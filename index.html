@@ -22,27 +22,27 @@
             stroke: #ff00ff;
             filter: drop-shadow(0 0 5px #ff00ff);
         }
-        svg .peca-ciano {
+        svg .blue-piece {
             fill: #00ffea;
             filter: drop-shadow(0 0 8px #00ffea);
         }
-        svg .peca-magenta {
+        svg .red-piece {
             fill: #ff00ff;
             filter: drop-shadow(0 0 8px #ff00ff);
         }
-        svg .borda-ciano {
+        svg .border-blue {
             fill: rgba(0, 255, 234, 0.4);
         }
-        svg .borda-magenta {
+        svg .border-red {
             fill: rgba(255, 0, 255, 0.4);
         }
-        .brilho-neon {
+        .neon-glow {
             box-shadow: 0 0 10px #00ffea, 0 0 20px #ff00ff;
         }
-        .botao-neon:hover {
+        .neon-button:hover {
             box-shadow: 0 0 15px #ff00ff, 0 0 30px #00ffea;
         }
-        .borda-neon {
+        .neon-border {
             border: 1px solid #00ffea;
             box-shadow: 0 0 10px #00ffea;
         }
@@ -54,13 +54,14 @@
         <p class="text-gray-400 mt-3 text-lg">Desafie a IA Minimax em um tabuleiro hexagonal futurista</p>
     </header>
     <div class="container mx-auto flex flex-row gap-6 max-w-6xl h-[80vh]">
-        <div class="w-1/4 p-6 bg-gray-900/90 rounded-2xl brilho-neon flex flex-col justify-between">
+        <!-- Left Sidebar: Game Settings -->
+        <div class="w-1/4 p-6 bg-gray-900/90 rounded-2xl neon-glow flex flex-col justify-between">
             <div>
                 <h2 class="text-2xl font-bold mb-6 text-cyan-400 tracking-wide">Configurações</h2>
                 <div class="space-y-6">
                     <div>
                         <label class="block text-sm font-medium mb-2 text-gray-300">Tamanho do Tabuleiro</label>
-                        <select id="tamanho-tabuleiro" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
+                        <select id="board-size" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
                             <option value="5">5x5</option>
                             <option value="7">7x7</option>
                             <option value="9">9x9</option>
@@ -71,21 +72,21 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2 text-gray-300">Modo de Jogo</label>
-                        <select id="modo-jogo" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
-                            <option value="jogador-vs-ia">Jogador vs IA</option>
-                            <option value="ia-vs-ia">IA vs IA</option>
+                        <select id="game-mode" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
+                            <option value="pva">Jogador vs IA</option>
+                            <option value="ava">IA vs IA</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2 text-gray-300">Algoritmo da IA</label>
-                        <select id="algoritmo-ia" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
+                        <select id="ai-algo" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
                             <option value="minimax">Minimax Puro</option>
                             <option value="alphabeta">Minimax com Alpha-Beta</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2 text-gray-300">Profundidade da IA</label>
-                        <select id="profundidade-ia" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
+                        <select id="ai-depth" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
                             <option value="1">1</option>
                             <option value="2">2</option>
                             <option value="3" selected>3</option>
@@ -95,617 +96,458 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium mb-2 text-gray-300">Cor do Jogador (Jogador vs IA)</label>
-                        <select id="cor-jogador" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
+                        <select id="player-color" class="w-full p-3 bg-gray-900 border border-cyan-500 rounded-lg focus:ring-2 focus:ring-pink-500 text-gray-200 shadow-md transition-all">
                             <option value="1">Ciano (Esquerda-Direita)</option>
                             <option value="2">Magenta (Cima-Baixo)</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <button id="iniciar-jogo" class="w-full bg-gradient-to-r from-cyan-500 to-pink-500 text-white p-3 rounded-lg botao-neon transition-all font-semibold mt-4">Iniciar Jogo</button>
+            <button id="start-game" class="w-full bg-gradient-to-r from-cyan-500 to-pink-500 text-white p-3 rounded-lg neon-button transition-all font-semibold mt-4">Iniciar Jogo</button>
         </div>
-        <!-- Tabuleiro Principal -->
-        <!-- Estratégia: Usa SVG para desenhar hexágonos dinamicamente, ajustando tamanhos para diferentes tabuleiros. -->
+        <!-- Main Board -->
         <div class="w-2/4 flex justify-center items-center">
-            <svg id="tabuleiro-hex" class="w-full h-full rounded-2xl bg-gray-900/80 backdrop-blur-md borda-neon"></svg>
+            <svg id="hex-board" class="w-full h-full rounded-2xl bg-gray-900/80 backdrop-blur-md neon-border"></svg>
         </div>
-        <!-- Painel Direito: Informações do Jogo -->
-        <!-- Estratégia: Exibe status, estatísticas e histórico para manter o usuário informado e engajado. -->
-        <div class="w-1/4 p-6 bg-gray-900/90 rounded-2xl brilho-neon flex flex-col justify-between">
+        <!-- Right Sidebar: Game Status -->
+        <div class="w-1/4 p-6 bg-gray-900/90 rounded-2xl neon-glow flex flex-col justify-between">
             <div>
                 <h2 class="text-2xl font-bold mb-6 text-cyan-400 tracking-wide">Informações</h2>
                 <div class="space-y-6">
-                    <div class="p-6 bg-gray-900/90 rounded-lg borda-neon">
+                    <div class="p-6 bg-gray-900/90 rounded-lg neon-border">
                         <h3 class="text-lg font-semibold text-cyan-400">Status</h3>
                         <p id="status" class="mt-3 text-gray-300 font-medium">Aguardando início...</p>
                     </div>
-                    <div class="p-6 bg-gray-900/90 rounded-lg borda-neon">
+                    <div class="p-6 bg-gray-900/90 rounded-lg neon-border">
                         <h3 class="text-lg font-semibold text-cyan-400">Estatísticas</h3>
-                        <p id="estatisticas" class="mt-3 text-sm text-gray-400">Nós: 0<br>Tempo: 0ms</p>
+                        <p id="stats" class="mt-3 text-sm text-gray-400">Nós: 0<br>Tempo: 0ms</p>
                     </div>
                 </div>
             </div>
-            <div class="p-6 bg-gray-900/90 rounded-lg borda-neon">
+            <div class="p-6 bg-gray-900/90 rounded-lg neon-border">
                 <h3 class="text-lg font-semibold text-cyan-400">Histórico de Jogadas</h3>
-                <ul id="log-jogadas" class="mt-3 text-sm text-gray-400 list-disc pl-5 max-h-48 overflow-y-auto"></ul>
+                <ul id="move-log" class="mt-3 text-sm text-gray-400 list-disc pl-5 max-h-48 overflow-y-auto"></ul>
             </div>
         </div>
     </div>
 
     <script>
-        /******************************************
-         * ALGORITMO 1: UNION-FIND (UniaoBusca)
-         * 
-         * OBJETIVO: Detectar rapidamente quando um jogador conectou suas bordas opostas
-         * 
-         * COMO FUNCIONA:
-         * 1. Cada célula começa sozinha em seu próprio conjunto
-         * 2. Quando jogador coloca peça, ela se une aos vizinhos da mesma cor
-         * 3. Usa "compressão de caminho" para manter operações rápidas
-         * 4. Bordas virtuais nos extremos para verificar vitória
-         ******************************************/
-
-        class UniaoBusca {
-            // 1
-            constructor(tamanho) {
-                // Cada célula começa como seu próprio conjunto
-                this.pai = Array.from({ length: tamanho }, (_, i) => i);
-                this.altura = new Array(tamanho).fill(0);
+        class UnionFind {
+            constructor(size) {
+                this.parent = Array.from({ length: size }, (_, i) => i);
+                this.rank = new Array(size).fill(0);
             }
-
-            // 2 Buscar (encontra o representante do conjunto):
-            buscar(x) {
-                if (this.pai[x] !== x) {
-                    this.pai[x] = this.buscar(this.pai[x]);
+            find(x) {
+                if (this.parent[x] !== x) {
+                    this.parent[x] = this.find(this.parent[x]);
                 }
-                return this.pai[x];
+                return this.parent[x];
             }
-
-            // Une dois conjuntos usando união por altura
-            // Estratégia: Une a árvore menor à maior para evitar árvores desbalanceadas, mantendo baixa complexidade.
-            unir(x, y) {
-                const raizX = this.buscar(x), raizY = this.buscar(y);
-                if (raizX !== raizY) {
-                    if (this.altura[raizX] > this.altura[raizY]) {
-                        this.pai[raizY] = raizX;
-                    } else if (this.altura[raizX] < this.altura[raizY]) {
-                        this.pai[raizX] = raizY;
+            union(x, y) {
+                const rx = this.find(x), ry = this.find(y);
+                if (rx !== ry) {
+                    if (this.rank[rx] > this.rank[ry]) {
+                        this.parent[ry] = rx;
+                    } else if (this.rank[rx] < this.rank[ry]) {
+                        this.parent[rx] = ry;
                     } else {
-                        this.pai[raizY] = raizX;
-                        this.altura[raizX]++;
+                        this.parent[ry] = rx;
+                        this.rank[rx]++;
                     }
                 }
             }
-
-            // Verifica se dois nós estão conectados
-            conectado(x, y) {
-                return this.buscar(x) === this.buscar(y);
+            connected(x, y) {
+                return this.find(x) === this.find(y);
             }
-
-            // Cria uma cópia do Union-Find para simulações
-            // Estratégia: Clonar permite simular jogadas sem alterar o estado original, essencial para o Minimax.
-            clonar() {
-                const copia = new UniaoBusca(this.pai.length);
-                copia.pai = [...this.pai];
-                copia.altura = [...this.altura];
-                return copia;
+            clone() {
+                const c = new UnionFind(this.parent.length);
+                c.parent = [...this.parent];
+                c.rank = [...this.rank];
+                return c;
             }
         }
 
-        /******************************************
-         * ALGORITMO 2: JOGO HEX COM IA
-         * 
-         * COMPONENTES PRINCIPAIS:
-         * 1. Tabuleiro Hexagonal: Grid especial onde células têm 6 vizinhos
-         * 2. Gerenciamento Estado: Controla jogadas, vez e vitória
-         * 3. IA Minimax: Toma decisões simulando jogadas futuras
-         * 4. Heurística: Avalia posições usando Dijkstra
-         ******************************************/
-
-        class JogoHex {
-            constructor(tamanho) {
-                this.tamanho = tamanho;
-                this.tabuleiro = Array.from({ length: tamanho }, () => new Array(tamanho).fill(0));
-                this.jogadorAtual = 1; // 1 = Ciano, 2 = Magenta
-                this.uniaoCiano = new UniaoBusca(tamanho * tamanho + 2);
-                this.uniaoMagenta = new UniaoBusca(tamanho * tamanho + 2);
-                this.cianoEsquerda = tamanho * tamanho;
-                this.cianoDireita = tamanho * tamanho + 1;
-                this.magentaCima = tamanho * tamanho;
-                this.magentaBaixo = tamanho * tamanho + 1;
-                this.vencedor = 0;
-                this.jogadas = [];
-                this.nosExplorados = 0;
-                this.tempoPensamento = 0;
+        class HexGame {
+            constructor(size) {
+                this.size = size;
+                this.board = Array.from({ length: size }, () => new Array(size).fill(0));
+                this.currentPlayer = 1;
+                this.blueUF = new UnionFind(size * size + 2);
+                this.redUF = new UnionFind(size * size + 2);
+                this.blueLeft = size * size;
+                this.blueRight = size * size + 1;
+                this.redTop = size * size;
+                this.redBottom = size * size + 1;
+                this.winner = 0;
+                this.moves = [];
+                this.nodesExplored = 0;
+                this.thinkingTime = 0;
             }
 
-            // Converte coordenadas (linha, coluna) em índice único
-            obterIndice(linha, coluna) {
-                return linha * this.tamanho + coluna;
+            getIndex(row, col) {
+                return row * this.size + col;
             }
 
-            // Retorna vizinhos de uma célula hexagonal
-            // Estratégia: O padrão hexagonal alterna offsets dependendo da paridade da linha, garantindo conectividade correta.
-            obterVizinhos(linha, coluna) {
-                const paridade = linha % 2;
-                const deltas = paridade === 0
+            getNeighbors(row, col) {
+                const parity = row % 2;
+                const deltas = parity === 0
                     ? [[1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [0, 1]]
                     : [[1, 1], [1, 0], [0, -1], [-1, 0], [-1, 1], [0, 1]];
-                return deltas.map(([dl, dc]) => [linha + dl, coluna + dc])
-                             .filter(([nl, nc]) => nl >= 0 && nl < this.tamanho && nc >= 0 && nc < this.tamanho);
+                return deltas.map(([dr, dc]) => [row + dr, col + dc])
+                            .filter(([nr, nc]) => nr >= 0 && nr < this.size && nc >= 0 && nc < this.size);
             }
 
-            // Coloca uma peça no tabuleiro e atualiza conexões
-            // Estratégia: Atualiza o Union-Find para conectar células adjacentes e bordas virtuais, verificando vitória imediatamente.
-            colocarPeca(linha, coluna, jogador) {
-                if (this.tabuleiro[linha][coluna] !== 0 || this.vencedor !== 0) return false;
-                this.tabuleiro[linha][coluna] = jogador;
-                const indice = this.obterIndice(linha, coluna);
-                const uniao = jogador === 1 ? this.uniaoCiano : this.uniaoMagenta;
-                const inicioVirtual = jogador === 1 ? this.cianoEsquerda : this.magentaCima;
-                const fimVirtual = jogador === 1 ? this.cianoDireita : this.magentaBaixo;
-
-                this.obterVizinhos(linha, coluna).forEach(([nl, nc]) => {
-                    if (this.tabuleiro[nl][nc] === jogador) {
-                        uniao.unir(indice, this.obterIndice(nl, nc));
+            placePiece(row, col, player) {
+                if (this.board[row][col] !== 0 || this.winner !== 0) return false;
+                this.board[row][col] = player;
+                const idx = this.getIndex(row, col);
+                const uf = player === 1 ? this.blueUF : this.redUF;
+                const virtualStart = player === 1 ? this.blueLeft : this.redTop;
+                const virtualEnd = player === 1 ? this.blueRight : this.redBottom;
+                this.getNeighbors(row, col).forEach(([nr, nc]) => {
+                    if (this.board[nr][nc] === player) {
+                        uf.union(idx, this.getIndex(nr, nc));
                     }
                 });
-
-                if (jogador === 1) {
-                    if (coluna === 0) uniao.unir(indice, inicioVirtual);
-                    if (coluna === this.tamanho - 1) uniao.unir(indice, fimVirtual);
+                if (player === 1) {
+                    if (col === 0) uf.union(idx, virtualStart);
+                    if (col === this.size - 1) uf.union(idx, virtualEnd);
                 } else {
-                    if (linha === 0) uniao.unir(indice, inicioVirtual);
-                    if (linha === this.tamanho - 1) uniao.unir(indice, fimVirtual);
+                    if (row === 0) uf.union(idx, virtualStart);
+                    if (row === this.size - 1) uf.union(idx, virtualEnd);
                 }
-
-                this.jogadas.push({ jogador, linha, coluna });
-                this.verificarVitoria(jogador);
-                this.jogadorAtual = 3 - jogador;
+                this.moves.push({ player, row, col });
+                this.checkWin(player);
+                this.currentPlayer = 3 - player;
                 return true;
             }
 
-            // Verifica se o jogador venceu conectando suas bordas
-            verificarVitoria(jogador) {
-                const uniao = jogador === 1 ? this.uniaoCiano : this.uniaoMagenta;
-                const inicioVirtual = jogador === 1 ? this.cianoEsquerda : this.magentaCima;
-                const fimVirtual = jogador === 1 ? this.cianoDireita : this.magentaBaixo;
-                if (uniao.conectado(inicioVirtual, fimVirtual)) {
-                    this.vencedor = jogador;
+            checkWin(player) {
+                const uf = player === 1 ? this.blueUF : this.redUF;
+                const virtualStart = player === 1 ? this.blueLeft : this.redTop;
+                const virtualEnd = player === 1 ? this.blueRight : this.redBottom;
+                if (uf.connected(virtualStart, virtualEnd)) {
+                    this.winner = player;
                 }
             }
 
-            // Verifica se o jogo terminou
-            ehTerminal() {
-                return this.vencedor !== 0 || this.obterJogadasValidas().length === 0;
+            isTerminal() {
+                return this.winner !== 0 || this.getValidMoves().length === 0;
             }
 
-            // Retorna todas as jogadas possíveis
-            obterJogadasValidas() {
-                const jogadas = [];
-                for (let l = 0; l < this.tamanho; l++) {
-                    for (let c = 0; c < this.tamanho; c++) {
-                        if (this.tabuleiro[l][c] === 0) jogadas.push([l, c]);
+            getValidMoves() {
+                const moves = [];
+                for (let r = 0; r < this.size; r++) {
+                    for (let c = 0; c < this.size; c++) {
+                        if (this.board[r][c] === 0) moves.push([r, c]);
                     }
                 }
-                return jogadas;
+                return moves;
             }
 
-            // Cria uma cópia do estado do jogo
-            // Estratégia: Clonar o estado permite simular jogadas futuras sem alterar o tabuleiro real, essencial para a IA.
-            clonar() {
-                const copia = new JogoHex(this.tamanho);
-                copia.tabuleiro = this.tabuleiro.map(linha => linha.slice());
-                copia.jogadorAtual = this.jogadorAtual;
-                copia.vencedor = this.vencedor;
-                copia.jogadas = [...this.jogadas];
-                copia.uniaoCiano = this.uniaoCiano.clonar();
-                copia.uniaoMagenta = this.uniaoMagenta.clonar();
-                return copia;
+            clone() {
+                const clone = new HexGame(this.size);
+                clone.board = this.board.map(row => row.slice());
+                clone.currentPlayer = this.currentPlayer;
+                clone.winner = this.winner;
+                clone.moves = [...this.moves];
+                clone.blueUF = this.blueUF.clone();
+                clone.redUF = this.redUF.clone();
+                return clone;
             }
 
-            /******************************************
-             * ALGORITMO 3: DIJKSTRA MODIFICADO
-             * 
-             * OBJETIVO: Calcular quão "fácil" é conectar as bordas
-             * 
-             * CUSTOS DE MOVIMENTO:
-             * - Célula própria: 0 (caminho livre)
-             * - Célula vazia: 1 (precisa de uma jogada)
-             * - Célula adversária: Infinito (bloqueado)
-             * 
-             * USADO NA: Heurística para avaliar posições
-             ******************************************/
+            shortestPathDist(player) {
+                const N = this.size;
+                const totalNodes = N * N + 2;
+                const S = N * N;
+                const G = N * N + 1;
+                const dist = new Array(totalNodes).fill(Infinity);
+                dist[S] = 0;
+                const visited = new Array(totalNodes).fill(false);
+                const isHorizontal = player === 1;
 
-            distanciaMenorCaminho(jogador) {
-                // Define o tamanho do tabuleiro e total de nós (incluindo nós virtuais)
-                const N = this.tamanho;
-                const totalNos = N * N + 2;  
-                const fonte = N * N;         // Nó virtual de início
-                const destino = N * N + 1;   // Nó virtual de fim
-                
-                // Inicializa arrays para o algoritmo de Dijkstra
-                const distancias = new Array(totalNos).fill(Infinity);  // Todas distâncias começam infinitas
-                distancias[fonte] = 0;                                  // Distância da fonte para ela mesma é 0
-                const visitado = new Array(totalNos).fill(false);       // Marca quais nós já foram visitados
-                const eHorizontal = jogador === 1;                      // Define direção do caminho (horizontal=ciano, vertical=magenta)
+                const getCost = (cellPlayer) => cellPlayer === player ? 0 : (cellPlayer === 0 ? 1 : Infinity);
 
-                // Função que define o custo de movimento para cada tipo de célula
-                const obterCusto = (jogadorCelula) => 
-                    jogadorCelula === jogador ? 0 :     // Célula própria: custo 0
-                    (jogadorCelula === 0 ? 1 : Infinity); // Célula vazia: custo 1, célula adversária: infinito
+                const startBorder = isHorizontal ? Array.from({ length: N }, (_, r) => this.getIndex(r, 0)) : Array.from({ length: N }, (_, c) => this.getIndex(0, c));
+                const endBorder = isHorizontal ? Array.from({ length: N }, (_, r) => this.getIndex(r, N-1)) : Array.from({ length: N }, (_, c) => this.getIndex(N-1, c));
 
-                // Define as bordas de início e fim baseado no jogador
-                const bordaInicio = eHorizontal
-                    ? Array.from({ length: N }, (_, l) => this.obterIndice(l, 0))     // Ciano: borda esquerda
-                    : Array.from({ length: N }, (_, c) => this.obterIndice(0, c));    // Magenta: borda superior
-                const bordaFim = eHorizontal
-                    ? Array.from({ length: N }, (_, l) => this.obterIndice(l, N - 1)) // Ciano: borda direita
-                    : Array.from({ length: N }, (_, c) => this.obterIndice(N - 1, c)); // Magenta: borda inferior
-
-                // Loop principal do algoritmo de Dijkstra
                 while (true) {
-                    // Encontra o nó não visitado com menor distância
-                    let menorDist = Infinity;
+                    let minDist = Infinity;
                     let u = -1;
-                    for (let i = 0; i < totalNos; i++) {
-                        if (!visitado[i] && distancias[i] < menorDist) {
-                            menorDist = distancias[i];
+                    for (let i = 0; i < totalNodes; i++) {
+                        if (!visited[i] && dist[i] < minDist) {
+                            minDist = dist[i];
                             u = i;
                         }
                     }
-                    if (u === -1) break; // Se não encontrou nó, termina
-                    visitado[u] = true;  // Marca nó como visitado
+                    if (u === -1) break;
+                    visited[u] = true;
 
-                    // Processa o nó atual baseado em seu tipo
-                    if (u === fonte) {
-                        // Se for a fonte, atualiza distâncias para todas as células da borda inicial
-                        bordaInicio.forEach(idx => {
-                            const custo = obterCusto(this.tabuleiro[Math.floor(idx / N)][idx % N]);
-                            if (distancias[idx] > distancias[fonte] + custo) 
-                                distancias[idx] = distancias[fonte] + custo;
+                    if (u === S) {
+                        startBorder.forEach(idx => {
+                            const cost = getCost(this.board[Math.floor(idx / N)][idx % N]);
+                            if (dist[idx] > dist[S] + cost) dist[idx] = dist[S] + cost;
                         });
-                    } else if (u === destino) {
-                        continue; // Ignora processamento do nó destino
+                    } else if (u === G) {
+                        continue;
                     } else {
-                        // Para células normais do tabuleiro:
-                        const linha = Math.floor(u / N);
-                        const coluna = u % N;
-                        // Processa todos os vizinhos da célula atual
-                        this.obterVizinhos(linha, coluna).forEach(([nl, nc]) => {
-                            const v = this.obterIndice(nl, nc);
-                            const custo = obterCusto(this.tabuleiro[nl][nc]);
-                            if (distancias[v] > distancias[u] + custo) 
-                                distancias[v] = distancias[u] + custo;
+                        const row = Math.floor(u / N);
+                        const col = u % N;
+                        this.getNeighbors(row, col).forEach(([nr, nc]) => {
+                            const v = this.getIndex(nr, nc);
+                            const cost = getCost(this.board[nr][nc]);
+                            if (dist[v] > dist[u] + cost) dist[v] = dist[u] + cost;
                         });
-                        // Se célula está na borda final, atualiza distância para o destino
-                        if (bordaFim.includes(u)) {
-                            if (distancias[destino] > distancias[u]) 
-                                distancias[destino] = distancias[u];
+                        if (endBorder.includes(u)) {
+                            if (dist[G] > dist[u]) dist[G] = dist[u];
                         }
                     }
                 }
 
-                // Retorna a distância mínima encontrada (ou N*N+1 se não houver caminho)
-                return distancias[destino] === Infinity ? N * N + 1 : distancias[destino];
+                return dist[G] === Infinity ? N * N + 1 : dist[G];
             }
 
-            /******************************************
-             * ALGORITMO 4: HEURÍSTICA DE AVALIAÇÃO
-             * 
-             * OBJETIVO: Dar uma "nota" para cada posição do tabuleiro
-             * 
-             * LÓGICA:
-             * 1. Se vitória: ±10000 (valor extremo)
-             * 2. Senão: distância_oponente - distância_própria
-             *    - Quanto menor sua distância, melhor
-             *    - Quanto maior a distância do oponente, melhor
-             ******************************************/
-
-            avaliar() {
-                if (this.vencedor === 1) return 10000;
-                if (this.vencedor === 2) return -10000;
-
-                const distCiano = this.distanciaMenorCaminho(1);
-                const distMagenta = this.distanciaMenorCaminho(2);
-
-                return this.jogadorAtual === 1 ? distMagenta - distCiano : distCiano - distMagenta;
+            // HEURÍSTICA: Avalia o tabuleiro calculando a distância do menor caminho para cada jogador conectar seus lados respectivos.
+            // A heurística retorna uma pontuação baseada na diferença entre a distância do oponente e a distância do jogador,
+            // favorecendo caminhos mais curtos para o jogador atual. Isso guia o algoritmo de busca em direção a movimentos vantajosos.
+            // Se um jogador já venceu, retorna um valor extremamente alto (10000 para vitória) ou baixo (-10000 para derrota).
+            
+            evaluate() {
+                if (this.winner === 1) return 10000;
+                if (this.winner === 2) return -10000;
+                const blueDist = this.shortestPathDist(1);
+                const redDist = this.shortestPathDist(2);
+                return this.currentPlayer === 1 ? redDist - blueDist : blueDist - redDist;
             }
 
-            /******************************************
-             * ALGORITMO 5: MINIMAX COM PODA ALPHA-BETA
-             * 
-             * OBJETIVO: Escolher a melhor jogada simulando o futuro
-             * 
-             * FUNCIONAMENTO:
-             * 1. Simula todas as jogadas possíveis até profundidade X
-             * 2. Alterna entre maximizar (IA) e minimizar (oponente)
-             * 3. Usa poda alpha-beta para ignorar jogadas ruins
-             * 4. Escolhe jogada com melhor avaliação heurística
-             * 
-             * OTIMIZAÇÃO:
-             * - Alpha: melhor valor garantido para MAX
-             * - Beta: melhor valor garantido para MIN
-             * - Se alpha >= beta: pode podar (ignorar) este ramo
-             ******************************************/
+            // ALGORITMO MINIMAX COM PODA ALPHA-BETA:
+            // Este algoritmo implementa uma busca adversarial em árvore de jogo com dois componentes principais:
+            // 
+            // 1. MINIMAX: Explora recursivamente todos os movimentos possíveis até uma profundidade máxima (depth).
+            //    - Alterna entre maximizar (isMax = true) e minimizar (isMax = false) para simular os turnos dos dois jogadores.
+            //    - Para o jogador atual (maximizador), busca o movimento que resulta no melhor valor.
+            //    - Para o oponente (minimizador), busca o movimento que resulta no pior valor para nós.
+            //    - Quando depth = 0 ou o jogo termina, avalia o estado atual usando a heurística.
+            //
+            // 2. PODA ALPHA-BETA (quando useAB = true): Otimiza o Minimax eliminando ramos desnecessários.
+            //    - alpha: melhor valor que o maximizador pode garantir.
+            //    - beta: melhor valor que o minimizador pode garantir.
+            //    - Se alpha >= beta em qualquer ponto, o ramo é podado (não precisa ser explorado).
+            //    - Reduz dramaticamente o número de nós explorados, especialmente em profundidades maiores.
+            //
+            // Parâmetros:
+            //   - depth: profundidade restante de busca (diminui a cada recursão).
+            //   - isMax: true se é a vez de maximizar, false se é a vez de minimizar.
+            //   - alpha: valor alfa para poda (apenas quando useAB = true).
+            //   - beta: valor beta para poda (apenas quando useAB = true).
+            //   - useAB: true para ativar poda alpha-beta, false para minimax puro.
+            //
+            // Retorna: Valor da posição atual (score da heurística ou resultado recursivo).
 
-            /**
-            * Função principal do algoritmo Minimax com Poda Alfa-Beta opcional.
-            *
-            * @param {number} profundidade - Quantos "níveis" (jogadas) à frente queremos olhar.
-            * @param {boolean} maximizando - É a vez do jogador que quer a MAIOR pontuação (MAX)?
-            * @param {number} alfa - O melhor valor (MAIOR) que o jogador MAX encontrou até agora em QUALQUER ramo.
-            * @param {number} beta - O melhor valor (MENOR) que o jogador MIN encontrou até agora em QUALQUER ramo.
-            * @param {boolean} usarPoda - Se 'true', ativa a Poda Alfa-Beta. Se 'false', é Minimax puro.
-            */
-            minimax(profundidade, maximizando, alfa, beta, usarPoda) {
-
-                this.nosExplorados++;
-
-                if (profundidade === 0 || this.ehTerminal()) {
-                    // Se a recursão parou, apenas retornamos a "nota" deste tabuleiro.
-                    // A função 'avaliar()' dá uma pontuação (ex: +10 se MAX ganhou, -10 se MIN ganhou, 0 se empate).
-                    return this.avaliar();
-                }
-
-                let melhorValor;
-
-                if (maximizando) {
-                    melhorValor = -Infinity;
-                } else {
-                    melhorValor = Infinity;
-                }
-
-
-                // --- LOOP PRINCIPAL (EXPLORANDO OS "FILHOS") ---
-
-                for (const [l, c] of this.obterJogadasValidas()) {
-
-                    const filho = this.clonar();
-
-                    filho.colocarPeca(l, c, filho.jogadorAtual);
-                    const valor = filho.minimax(profundidade - 1, !maximizando, alfa, beta, usarPoda);
-                    
-                    
-                    if (maximizando) {
-                        melhorValor = Math.max(melhorValor, valor);
-                        // --- LÓGICA DO ALFA (SÓ SE A PODA ESTIVER ATIVA) ---
-                        if (usarPoda) {
-                            alfa = Math.max(alfa, melhorValor);
-                        }
-
-                    } else { 
-
-                        melhorValor = Math.min(melhorValor, valor);
-                        
-                        // --- LÓGICA DO BETA (SÓ SE A PODA ESTIVER ATIVA) ---
-                        if (usarPoda) {
-                            beta = Math.min(beta, melhorValor);
-                        }
+            minimax(depth, isMax, alpha, beta, useAB) {
+                this.nodesExplored++;
+                if (depth === 0 || this.isTerminal()) return this.evaluate();
+                let best = isMax ? -Infinity : Infinity;
+                const moves = this.getValidMoves();
+                for (const [r, c] of moves) {
+                    const child = this.clone();
+                    child.placePiece(r, c, child.currentPlayer);
+                    const val = child.minimax(depth - 1, !isMax, alpha, beta, useAB);
+                    if (isMax) {
+                        best = Math.max(best, val);
+                        if (useAB) alpha = Math.max(alpha, best);
+                    } else {
+                        best = Math.min(best, val);
+                        if (useAB) beta = Math.min(beta, best);
                     }
-                    
-                    // --- A PODA (O CORTE ALFA-BETA) ---
-                    if (usarPoda && alfa >= beta) {
-                        break; 
-                    }
-                } 
-                return melhorValor;
+                    if (useAB && alpha >= beta) break;
+                }
+                return best;
             }
 
-            // Escolhe o melhor movimento para a IA
-            // Estratégia: Testa cada jogada possível e escolhe a que maximiza (ou minimiza) a pontuação, dependendo do jogador.
-            obterMelhorJogada(algoritmo, profundidade) {
-                this.nosExplorados = 0;
-                const inicio = performance.now();
-                let melhorValor = this.jogadorAtual === 1 ? -Infinity : Infinity;
-                let melhorJogada = null;
-                const usarPoda = algoritmo === 'alphabeta';
-
-                for (const [l, c] of this.obterJogadasValidas()) {
-                    const filho = this.clonar();
-                    filho.colocarPeca(l, c, this.jogadorAtual);
-                    const valor = filho.minimax(profundidade - 1, this.jogadorAtual !== 1, -Infinity, Infinity, usarPoda);
-                    if (this.jogadorAtual === 1 ? valor > melhorValor : valor < melhorValor) {
-                        melhorValor = valor;
-                        melhorJogada = [l, c];
+            getBestMove(algo, depth) {
+                this.nodesExplored = 0;
+                const startTime = performance.now();
+                let bestVal = this.currentPlayer === 1 ? -Infinity : Infinity;
+                let bestMove = null;
+                const useAB = algo === 'alphabeta';
+                const moves = this.getValidMoves();
+                for (const [r, c] of moves) {
+                    const child = this.clone();
+                    child.placePiece(r, c, this.currentPlayer);
+                    const val = child.minimax(depth - 1, this.currentPlayer !== 1, -Infinity, Infinity, useAB);
+                    if (this.currentPlayer === 1 ? val > bestVal : val < bestVal) {
+                        bestVal = val;
+                        bestMove = [r, c];
                     }
                 }
-                this.tempoPensamento = performance.now() - inicio;
-                return melhorJogada;
+                this.thinkingTime = performance.now() - startTime;
+                return bestMove;
             }
         }
 
-        /******************************************
-         * INTERFACE GRÁFICA E INTERAÇÃO
-         * 
-         * COMPONENTES:
-         * 1. Tabuleiro SVG: Hexágonos e peças com efeito neon
-         * 2. Painel Configuração: Tamanho, modo, algoritmo, profundidade
-         * 3. Painel Informações: Status, estatísticas, histórico
-         * 4. Eventos: Cliques do jogador e jogadas da IA
-         ******************************************/
+        let hexSide = 30;
+        let hexWidth = Math.sqrt(3) * hexSide;
+        let hexHeight = 2 * hexSide;
 
-        // Variáveis globais para renderização
-        // Estratégia: Ajusta dinamicamente o tamanho dos hexágonos com base no tamanho do tabuleiro para garantir boa visualização.
-        let ladoHex = 30;
-        let larguraHex = Math.sqrt(3) * ladoHex;
-        let alturaHex = 2 * ladoHex;
-
-        // Função de renderização do tabuleiro
-        // Estratégia: Desenha hexágonos com SVG, usando cores neon (ciano e magenta) para reforçar o tema cyberpunk.
-        function renderizarTabuleiro(jogo, svg) {
-            ladoHex = Math.min(30, 700 / (jogo.tamanho * Math.sqrt(3)));
-            larguraHex = Math.sqrt(3) * ladoHex;
-            alturaHex = 2 * ladoHex;
+        function renderBoard(game, svg) {
+            hexSide = Math.min(30, 700 / (game.size * Math.sqrt(3)));
+            hexWidth = Math.sqrt(3) * hexSide;
+            hexHeight = 2 * hexSide;
 
             svg.innerHTML = '';
-            const offsetX = larguraHex;
-            const offsetY = alturaHex / 2;
-            const larguraTotal = jogo.tamanho * larguraHex + larguraHex / 2 + offsetX * 2;
-            const alturaTotal = jogo.tamanho * (alturaHex * 3 / 4) + alturaHex + offsetY * 2;
-            svg.setAttribute('viewBox', `0 0 ${larguraTotal} ${alturaTotal}`);
+            const offsetX = hexWidth;
+            const offsetY = hexHeight / 2;
+            const totalW = game.size * hexWidth + hexWidth / 2 + offsetX * 2;
+            const totalH = game.size * (hexHeight * 3 / 4) + hexHeight + offsetY * 2;
+            svg.setAttribute('viewBox', `0 0 ${totalW} ${totalH}`);
             svg.setAttribute('width', '100%');
             svg.setAttribute('height', '100%');
 
-            // Desenha bordas ciano (esquerda e direita)
-            for (let l = 0; l < jogo.tamanho; l++) {
+            for (let r = 0; r < game.size; r++) {
                 const x = 0 + offsetX;
-                const y = l * (alturaHex * 3 / 4) + offsetY + alturaHex / 2;
-                const retangulo = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                retangulo.setAttribute('x', x - larguraHex / 2 - 15);
-                retangulo.setAttribute('y', y - ladoHex);
-                retangulo.setAttribute('width', 15);
-                retangulo.setAttribute('height', alturaHex);
-                retangulo.classList.add('borda-ciano');
-                svg.appendChild(retangulo);
+                const y = r * (hexHeight * 3 / 4) + offsetY + hexHeight / 2;
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x - hexWidth / 2 - 15);
+                rect.setAttribute('y', y - hexSide);
+                rect.setAttribute('width', 15);
+                rect.setAttribute('height', hexHeight);
+                rect.classList.add('border-blue');
+                svg.appendChild(rect);
             }
-            for (let l = 0; l < jogo.tamanho; l++) {
-                const x = (jogo.tamanho - 1) * larguraHex + (l % 2 ? larguraHex / 2 : 0) + offsetX;
-                const y = l * (alturaHex * 3 / 4) + offsetY + alturaHex / 2;
-                const retangulo = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                retangulo.setAttribute('x', x + larguraHex / 2);
-                retangulo.setAttribute('y', y - ladoHex);
-                retangulo.setAttribute('width', 15);
-                retangulo.setAttribute('height', alturaHex);
-                retangulo.classList.add('borda-ciano');
-                svg.appendChild(retangulo);
+            for (let r = 0; r < game.size; r++) {
+                const x = (game.size - 1) * hexWidth + (r % 2 ? hexWidth / 2 : 0) + offsetX;
+                const y = r * (hexHeight * 3 / 4) + offsetY + hexHeight / 2;
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x + hexWidth / 2);
+                rect.setAttribute('y', y - hexSide);
+                rect.setAttribute('width', 15);
+                rect.setAttribute('height', hexHeight);
+                rect.classList.add('border-blue');
+                svg.appendChild(rect);
             }
-
-            // Desenha bordas magenta (cima e baixo)
-            for (let c = 0; c < jogo.tamanho; c++) {
-                const x = c * larguraHex + offsetX;
+            for (let c = 0; c < game.size; c++) {
+                const x = c * hexWidth + offsetX;
                 const y = offsetY;
-                const retangulo = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                retangulo.setAttribute('x', x - larguraHex / 2);
-                retangulo.setAttribute('y', y - ladoHex - 15);
-                retangulo.setAttribute('width', larguraHex);
-                retangulo.setAttribute('height', 15);
-                retangulo.classList.add('borda-magenta');
-                svg.appendChild(retangulo);
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x - hexWidth / 2);
+                rect.setAttribute('y', y - hexSide - 15);
+                rect.setAttribute('width', hexWidth);
+                rect.setAttribute('height', 15);
+                rect.classList.add('border-red');
+                svg.appendChild(rect);
             }
-            for (let c = 0; c < jogo.tamanho; c++) {
-                const x = c * larguraHex + ((jogo.tamanho - 1) % 2 ? larguraHex / 2 : 0) + offsetX;
-                const y = (jogo.tamanho - 1) * (alturaHex * 3 / 4) + offsetY + alturaHex / 2;
-                const retangulo = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                retangulo.setAttribute('x', x - larguraHex / 2);
-                retangulo.setAttribute('y', y + ladoHex);
-                retangulo.setAttribute('width', larguraHex);
-                retangulo.setAttribute('height', 15);
-                retangulo.classList.add('borda-magenta');
-                svg.appendChild(retangulo);
+            for (let c = 0; c < game.size; c++) {
+                const x = c * hexWidth + ((game.size - 1) % 2 ? hexWidth / 2 : 0) + offsetX;
+                const y = (game.size - 1) * (hexHeight * 3 / 4) + offsetY + hexHeight / 2;
+                const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                rect.setAttribute('x', x - hexWidth / 2);
+                rect.setAttribute('y', y + hexSide);
+                rect.setAttribute('width', hexWidth);
+                rect.setAttribute('height', 15);
+                rect.classList.add('border-red');
+                svg.appendChild(rect);
             }
 
-            // Desenha hexágonos e peças
-            for (let l = 0; l < jogo.tamanho; l++) {
-                for (let c = 0; c < jogo.tamanho; c++) {
-                    const x = c * larguraHex + (l % 2 ? larguraHex / 2 : 0) + offsetX;
-                    const y = l * (alturaHex * 3 / 4) + offsetY + alturaHex / 2;
-                    const pontos = [
-                        [x, y - ladoHex],
-                        [x + larguraHex / 2, y - ladoHex / 2],
-                        [x + larguraHex / 2, y + ladoHex / 2],
-                        [x, y + ladoHex],
-                        [x - larguraHex / 2, y + ladoHex / 2],
-                        [x - larguraHex / 2, y - ladoHex / 2]
+            for (let r = 0; r < game.size; r++) {
+                for (let c = 0; c < game.size; c++) {
+                    const x = c * hexWidth + (r % 2 ? hexWidth / 2 : 0) + offsetX;
+                    const y = r * (hexHeight * 3 / 4) + offsetY + hexHeight / 2;
+                    const points = [
+                        [x, y - hexSide],
+                        [x + hexWidth / 2, y - hexSide / 2],
+                        [x + hexWidth / 2, y + hexSide / 2],
+                        [x, y + hexSide],
+                        [x - hexWidth / 2, y + hexSide / 2],
+                        [x - hexWidth / 2, y - hexSide / 2]
                     ].map(p => p.join(',')).join(' ');
                     const hex = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
-                    hex.setAttribute('points', pontos);
+                    hex.setAttribute('points', points);
                     hex.classList.add('hex');
-                    hex.dataset.linha = l;
-                    hex.dataset.coluna = c;
+                    hex.dataset.row = r;
+                    hex.dataset.col = c;
                     svg.appendChild(hex);
 
-                    if (jogo.tabuleiro[l][c] !== 0) {
-                        const circulo = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                        circulo.setAttribute('cx', x);
-                        circulo.setAttribute('cy', y);
-                        circulo.setAttribute('r', ladoHex * 0.7);
-                        circulo.classList.add(jogo.tabuleiro[l][c] === 1 ? 'peca-ciano' : 'peca-magenta');
-                        svg.appendChild(circulo);
+                    if (game.board[r][c] !== 0) {
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('cx', x);
+                        circle.setAttribute('cy', y);
+                        circle.setAttribute('r', hexSide * 0.7);
+                        circle.classList.add(game.board[r][c] === 1 ? 'blue-piece' : 'red-piece');
+                        svg.appendChild(circle);
                     }
                 }
             }
         }
 
-        // Configurações iniciais
-        let jogo = null;
-        let modo = 'jogador-vs-ia';
-        let corJogador = 1;
-        let algoritmoIA = 'minimax'; // Começa com 'minimax' = poda desligada
-        let profundidadeIA = 3;
+        let game = null;
+        let mode = 'pva';
+        let playerColor = 1;
+        let aiAlgo = 'minimax';
+        let aiDepth = 3;
 
-        // Evento de início do jogo
-        // Estratégia: Reinicia o jogo com as configurações escolhidas, garantindo flexibilidade e controle do usuário.
-        document.getElementById('iniciar-jogo').addEventListener('click', () => {
-            const tamanho = parseInt(document.getElementById('tamanho-tabuleiro').value);
-            modo = document.getElementById('modo-jogo').value;
-            algoritmoIA = document.getElementById('algoritmo-ia').value;
-            profundidadeIA = parseInt(document.getElementById('profundidade-ia').value);
-            corJogador = parseInt(document.getElementById('cor-jogador').value);
-            jogo = new JogoHex(tamanho);
-            renderizarTabuleiro(jogo, document.getElementById('tabuleiro-hex'));
-            document.getElementById('log-jogadas').innerHTML = '';
+        document.getElementById('start-game').addEventListener('click', () => {
+            const size = parseInt(document.getElementById('board-size').value);
+            mode = document.getElementById('game-mode').value;
+            aiAlgo = document.getElementById('ai-algo').value;
+            aiDepth = parseInt(document.getElementById('ai-depth').value);
+            playerColor = parseInt(document.getElementById('player-color').value);
+            game = new HexGame(size);
+            renderBoard(game, document.getElementById('hex-board'));
+            document.getElementById('move-log').innerHTML = '';
             document.getElementById('status').textContent = 'Vez atual: Ciano (Esquerda para Direita)';
-            document.getElementById('estatisticas').textContent = 'Nós: 0\nTempo: 0ms';
-            if (modo === 'ia-vs-ia' || (modo === 'jogador-vs-ia' && jogo.jogadorAtual !== corJogador)) {
-                jogadaIA();
+            document.getElementById('stats').textContent = 'Nós: 0\nTempo: 0ms';
+            if (mode === 'ava' || (mode === 'pva' && game.currentPlayer !== playerColor)) {
+                aiMove();
             }
         });
 
-        // Evento de clique no tabuleiro
-        // Estratégia: Permite ao jogador interagir diretamente com o tabuleiro, mas só em turnos válidos.
-        document.getElementById('tabuleiro-hex').addEventListener('click', (e) => {
-            if (!jogo || jogo.vencedor || (modo === 'jogador-vs-ia' && jogo.jogadorAtual !== corJogador)) return;
-            const alvo = e.target;
-            if (alvo.tagName.toLowerCase() === 'polygon') {
-                const l = parseInt(alvo.dataset.linha);
-                const c = parseInt(alvo.dataset.coluna);
-                if (jogo.colocarPeca(l, c, jogo.jogadorAtual)) {
-                    renderizarTabuleiro(jogo, document.getElementById('tabuleiro-hex'));
-                    registrarJogada(jogo.jogadas.length, jogo.jogadas[jogo.jogadas.length - 1].jogador, l, c);
-                    atualizarStatus();
-                    if (jogo.vencedor) alert(`${jogo.vencedor === 1 ? 'Ciano' : 'Magenta'} venceu!`);
-                    if (!jogo.vencedor && (modo === 'ia-vs-ia' || jogo.jogadorAtual !== corJogador)) {
-                        jogadaIA();
+        document.getElementById('hex-board').addEventListener('click', (e) => {
+            if (!game || game.winner || (mode === 'pva' && game.currentPlayer !== playerColor)) return;
+            const target = e.target;
+            if (target.tagName.toLowerCase() === 'polygon') {
+                const r = parseInt(target.dataset.row);
+                const c = parseInt(target.dataset.col);
+                if (game.placePiece(r, c, game.currentPlayer)) {
+                    renderBoard(game, document.getElementById('hex-board'));
+                    logMove(game.moves.length, game.moves[game.moves.length - 1].player, r, c);
+                    updateStatus();
+                    if (game.winner) alert(`${game.winner === 1 ? 'Ciano' : 'Magenta'} venceu!`);
+                    if (!game.winner && (mode === 'ava' || game.currentPlayer !== playerColor)) {
+                        aiMove();
                     }
                 }
             }
         });
 
-        // Executa a jogada da IA
-        // Estratégia: Usa setTimeout para simular "pensamento", melhorando a experiência do usuário.
-        function jogadaIA() {
-            if (!jogo || jogo.vencedor) return;
+        function aiMove() {
+            if (!game || game.winner) return;
             document.getElementById('status').textContent = 'IA está pensando...';
             setTimeout(() => {
-                const [l, c] = jogo.obterMelhorJogada(algoritmoIA, profundidadeIA);
-                jogo.colocarPeca(l, c, jogo.jogadorAtual);
-                renderizarTabuleiro(jogo, document.getElementById('tabuleiro-hex'));
-                registrarJogada(jogo.jogadas.length, jogo.jogadas[jogo.jogadas.length - 1].jogador, l, c);
-                atualizarStatus();
-                if (jogo.vencedor) alert(`${jogo.vencedor === 1 ? 'Ciano' : 'Magenta'} venceu!`);
-                document.getElementById('estatisticas').textContent = `Nós: ${jogo.nosExplorados}\nTempo: ${jogo.tempoPensamento.toFixed(2)}ms`;
-                if (modo === 'ia-vs-ia' && !jogo.vencedor) {
-                    jogadaIA();
+                const [r, c] = game.getBestMove(aiAlgo, aiDepth);
+                game.placePiece(r, c, game.currentPlayer);
+                renderBoard(game, document.getElementById('hex-board'));
+                logMove(game.moves.length, game.moves[game.moves.length - 1].player, r, c);
+                updateStatus();
+                if (game.winner) alert(`${game.winner === 1 ? 'Ciano' : 'Magenta'} venceu!`);
+                document.getElementById('stats').textContent = `Nós: ${game.nodesExplored}\nTempo: ${game.thinkingTime.toFixed(2)}ms`;
+                if (mode === 'ava' && !game.winner) {
+                    aiMove();
                 }
             }, 100);
         }
 
-        // Registra uma jogada no histórico
-        // Estratégia: Mantém um log visível para o usuário acompanhar o progresso do jogo.
-        function registrarJogada(numero, jogador, l, c) {
+        function logMove(num, player, r, c) {
             const li = document.createElement('li');
-            li.textContent = `#${numero}: ${jogador === 1 ? 'Ciano' : 'Magenta'} (${l},${c})`;
-            document.getElementById('log-jogadas').appendChild(li);
+            li.textContent = `#${num}: ${player === 1 ? 'Ciano' : 'Magenta'} (${r},${c})`;
+            document.getElementById('move-log').appendChild(li);
         }
 
-        // Atualiza o status do jogo
-        // Estratégia: Informa ao usuário sobre o estado atual (vez ou vencedor), mantendo a interface clara.
-        function atualizarStatus() {
-            if (jogo.vencedor) {
-                document.getElementById('status').textContent = `${jogo.vencedor === 1 ? 'Ciano' : 'Magenta'} venceu!`;
+        function updateStatus() {
+            if (game.winner) {
+                document.getElementById('status').textContent = `${game.winner === 1 ? 'Ciano' : 'Magenta'} venceu!`;
             } else {
-                document.getElementById('status').textContent = `Vez atual: ${jogo.jogadorAtual === 1 ? 'Ciano (Esquerda para Direita)' : 'Magenta (Cima para Baixo)'}`;
+                document.getElementById('status').textContent = `Vez atual: ${game.currentPlayer === 1 ? 'Ciano (Esquerda para Direita)' : 'Magenta (Cima para Baixo)'}`;
             }
         }
     </script>
